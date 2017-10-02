@@ -498,7 +498,7 @@ contract FreePaySystem is SafeMath {
         //Calculate bounty tokens depending on total tokens sold
         uint bountyTokens = mulByFraction(tokensSold, 25, 1000); // 2.5%
 
-        cartaxiToken.emitTokens(bountyOwner, bountyTokens);
+        freepaysystemToken.emitTokens(bountyOwner, bountyTokens);
 
         sentTokensToBountyOwner = true;
     }
@@ -516,10 +516,10 @@ contract FreePaySystem is SafeMath {
         uint founderReward = mulByFraction(totalRewardToFounders, 25, 100); // 25% pie
 
         //send every founder 25% of total founder reward
-        cartaxiToken.emitTokens(founder1, founderReward);
-        cartaxiToken.emitTokens(founder2, founderReward);
-        cartaxiToken.emitTokens(founder3, founderReward);
-        cartaxiToken.emitTokens(founder4, founderReward);
+        freepaysystemToken.emitTokens(founder1, founderReward);
+        freepaysystemToken.emitTokens(founder2, founderReward);
+        freepaysystemToken.emitTokens(founder3, founderReward);
+        freepaysystemToken.emitTokens(founder4, founderReward);
 
         sentTokensToFounders = true;
     }

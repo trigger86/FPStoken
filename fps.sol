@@ -6,10 +6,12 @@ pragma solidity ^0.4.11;
  * Сыроватый кодик, требутеся тестирование и редактирование
  */
 contract SafeMath {
-
+    // Важный пункт, сколько будет длиться контракт safeMath, т.е. сбор средств
     uint constant DAY_IN_SECONDS = 86400;
     uint constant BASE = 1000000000000000000;
+    // Цена на PREICO
     uint constant preIcoPrice = 2000;
+    // Цена на ICO
     uint constant icoPrice = 2139;
 
     function mul(uint256 a, uint256 b) constant internal returns (uint256) {
@@ -40,10 +42,10 @@ contract SafeMath {
         return div(mul(number, numerator), denominator);
     }
 
-    // presale volume bonus calculation 
+    // presale volume bonus calculation - PRESALE
     function presaleVolumeBonus(uint256 price) internal returns (uint256) {
 
-        // preFPS > ETH
+        // preFPS > ETH, простой обработчик if, в заивисимости от средств будет соответствующиая % надбавка
         uint256 val = div(price, preIcoPrice);
 
         if(val >= 100 * BASE) return add(price, price * 1/20); // 5%
@@ -53,7 +55,7 @@ contract SafeMath {
         return price;
     }
 
-    // ICO volume bonus calculation
+    // ICO volume bonus calculation - собственно калькуляция бонуса ICO
     function volumeBonus(uint256 etherValue) internal returns (uint256) {
 
         if(etherValue >= 1000000000000000000000) return 15;// +15% tokens
@@ -69,7 +71,7 @@ contract SafeMath {
     // ICO date bonus calculation
     function dateBonus(uint startIco) internal returns (uint256) {
 
-        // day from ICO start
+        // day from ICO start - счетчик относительно вложенных и полученных монет
         uint daysFromStart = (now - startIco) / DAY_IN_SECONDS + 1;
 
         if(daysFromStart == 1) return 15; // +15% tokens
@@ -88,6 +90,7 @@ contract SafeMath {
 
 /// Implements ERC 20 Token standard: https://github.com/ethereum/EIPs/issues/20
 /// @title Abstract token contract - Functions to be implemented by token contracts.
+/// Это стандарты токена ERC20, которые предоставляет эфирная площадка
 
 contract AbstractToken {
     function totalSupply() constant returns (uint256) {}
@@ -185,13 +188,13 @@ contract StandardToken is AbstractToken {
 
 contract FreePaySystem is StandardToken, SafeMath {
     /*
-     * Token meta data
+     * Token meta data - собственно сам токен
      */
     string public constant name = "FreePaySys";
     string public constant symbol = "FPS";
     uint public constant decimals = 18;
 
-    // tottal supply
+    // tottal supply - поддержка токена на ICO
 
     address public icoContract = 0x0;
     /*
@@ -254,7 +257,7 @@ contract FreePaySystem is StandardToken, SafeMath {
 
 contract FreePaySystem is SafeMath {
     /*
-     * ICO meta data
+     * ICO meta data - собственно ICO
      */
     FreePaySystem public freepaysystemToken;
     AbstractToken public preIcoToken;
@@ -296,8 +299,8 @@ contract FreePaySystem is SafeMath {
     // BASE = 10^18
     uint constant BASE = 1000000000000000000;
 
-    // 2018.02.04 07:00 UTC
-    // founders' reward time
+    // 2018.02.04 07:00 UTC - Время от которого надо отталкиваться
+    // founders' reward time - общее время от нагрождения
     uint public foundersRewardTime = 1517727600;
 
     // Amount of imported tokens from pre-ICO
@@ -399,14 +402,14 @@ contract FreePaySystem is SafeMath {
         }
     }
 
-    /// @dev Sets new manager. Only manager can do it
+    /// @dev Sets new manager. Only manager can do it - добавляем менеджера
     /// @param _newIcoManager Address of new ICO manager
     function setNewManager(address _newIcoManager) onlyManager {
         assert(_newIcoManager != 0x0);
         icoManager = _newIcoManager;
     }
 
-    /// @dev Sets bounty owner. Only manager can do it
+    /// @dev Sets bounty owner. Only manager can do it - держатель баунти менеджер
     /// @param _bountyOwner Address of Bounty owner
     function setBountyOwner(address _bountyOwner) onlyManager {
         assert(_bountyOwner != 0x0);
@@ -462,7 +465,7 @@ contract FreePaySystem is SafeMath {
         etherRaised = add(etherRaised, msg.value);
     }
 
-    /// @dev Fall back function ~50k-100k gas
+    /// @dev Fall back function ~50k-100k gas - плата за GAS
     function () payable onIcoRunning {
         buyTokens(msg.sender);
     }
@@ -489,7 +492,7 @@ contract FreePaySystem is SafeMath {
         }
     }
 
-    ///@dev Send tokens to bountyOwner depending on crowdsale results. Can be send only after ICO.
+    ///@dev Send tokens to bountyOwner depending on crowdsale results. Can be send only after ICO. - программа баунти только после ICO
     function sendTokensToBountyOwner() onlyManager whenInitialized {
         require(!sentTokensToBountyOwner);
 
@@ -504,7 +507,7 @@ contract FreePaySystem is SafeMath {
         sentTokensToBountyOwner = true;
     }
 
-    /// @dev Send tokens to founders. Can be sent only after cartaxiToken.rewardTime() (2018.02.04 0:00 UTC)
+    /// @dev Send tokens to founders. Can be sent only after freepaysystemToken.rewardTime() (2018.02.04 0:00 UTC) - тоже пункт на правку
     function sendTokensToFounders() onlyManager whenInitialized {
         require(!sentTokensToFounders && now >= foundersRewardTime);
 
